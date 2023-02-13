@@ -1,0 +1,3 @@
+// insert json data
+
+db.school.insert({name: "Holberton school"})
