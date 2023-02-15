@@ -38,3 +38,33 @@ class Cache:
     def get_int(self, data: bytes) -> int:
         """ Bytes to integer """
         return int.from_bytes(data, sys.byteorder)
+    
+def replay(method: Callable):
+    """ Replay. """
+    key = method.__qualname__
+    i = "".join([key, ":inputs"])
+    o = "".join([key, ":outputs"])
+    count = method.__self__.get(key)
+    i_list = method.__self__._redis.lrange(i, 0, -1)
+    o_list = method.__self__._redis.lrange(o, 0, -1)
+    queue = list(zip(i_list, o_list))
+    print(f"{key} was called {decode_utf8(count)} times:")
+    for k, v, in queue:
+        k = decode_utf8(k)
+        v = decode_utf8(v)
+        print(f"{key}(*{k}) -> {v}")
+
+
+def call_history(method: Callable) -> Callable:
+    """ Call history. """
+    key = method.__qualname__
+    i = "".join([key, ":inputs"])
+    o = "".join([key, ":outputs"])
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """ Wrapp """
+        self._redis.rpush(i, str(args))
+        res = method(self, *args, **kwargs)
+        self._redis.rpush(o, str(res))
+        return res
+    return wrapper
