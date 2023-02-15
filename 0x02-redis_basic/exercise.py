@@ -68,4 +68,3 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(o, str(res))
         return res
     return wrapper
-
