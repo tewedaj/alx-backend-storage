@@ -38,4 +38,3 @@ class Cache:
     def get_int(self, data: bytes) -> int:
         """ Bytes to integer """
         return int.from_bytes(data, sys.byteorder)
-    
