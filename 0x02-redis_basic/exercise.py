@@ -68,3 +68,13 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(o, str(res))
         return res
     return wrapper
+def count_calls(method: Callable) -> Callable:
+    """ Count calls """
+    key = method.__qualname__
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """ Wrapp """
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    return wrapper
+
